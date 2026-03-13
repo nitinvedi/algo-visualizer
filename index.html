@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amaze - Maze Generation &amp; Solving Visualizer</title>
+    <meta name="description" content="Interactive visualizer for maze generation (DFS, Kruskal, Prim, Wilson, Aldous-Broder, Recursive Division) and pathfinding (BFS, Dijkstra, A*, Greedy, Bidirectional BFS) algorithms.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-dark">
+    <div class="app-container">
+
+        <!-- ── NAVBAR ── -->
+        <header class="navbar">
+            <div class="brand">
+                <h1>A<span class="brand-accent">maze</span><span class="brand-dot">.</span></h1>
+            </div>
+
+            <div class="controls">
+                <!-- Maze Generation -->
+                <div class="control-group">
+                    <label class="control-label">Generate</label>
+                    <select id="maze-algorithm">
+                        <option value="dfs">Depth-First Search</option>
+                        <option value="kruskal">Kruskal's</option>
+                        <option value="prim">Prim's</option>
+                        <option value="wilson">Wilson's</option>
+                        <option value="aldous-broder">Aldous-Broder</option>
+                        <option value="recursive-division">Recursive Division</option>
+                    </select>
+                    <button class="btn btn-primary" id="generate-maze-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Generate
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="nav-divider"></div>
+
+                <!-- Pathfinding -->
+                <div class="control-group">
+                    <label class="control-label">Solve</label>
+                    <select id="path-algorithm">
+                        <option value="bfs">Breadth-First Search</option>
+                        <option value="bidirectional-bfs">Bidirectional BFS</option>
+                        <option value="greedy">Greedy Best-First</option>
+                        <option value="dijkstra">Dijkstra's</option>
+                        <option value="astar">A* Search</option>
+                    </select>
+                    <button class="btn btn-success" id="solve-maze-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                        Solve
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="nav-divider"></div>
+
+                <!-- Utilities -->
+                <div class="control-group">
+                    <label class="control-label">Speed</label>
+                    <select id="speed-selector">
+                        <option value="slow">Slow</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="fast">Fast</option>
+                    </select>
+                    <button class="btn btn-ghost" id="clear-path-btn">Clear Path</button>
+                    <button class="btn btn-ghost" id="clear-board-btn">Clear Board</button>
+                </div>
+
+                <!-- Divider -->
+                <div class="nav-divider"></div>
+
+                <!-- Themes -->
+                <div class="control-group">
+                    <label class="control-label">Theme</label>
+                    <div class="theme-switcher">
+                        <button class="theme-btn active" data-theme="theme-dark" title="Dark">🌑</button>
+                        <button class="theme-btn" data-theme="theme-cyberpunk" title="Cyberpunk">⚡</button>
+                        <button class="theme-btn" data-theme="theme-matrix" title="Matrix">💻</button>
+                        <button class="theme-btn" data-theme="theme-light" title="Light">☀️</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── MAIN ── -->
+        <main class="main-content">
+
+            <!-- Legend + Stats row -->
+            <div class="info-bar">
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-box start-node"></div>Start</div>
+                    <div class="legend-item"><div class="legend-box end-node"></div>End</div>
+                    <div class="legend-item"><div class="legend-box wall-node"></div>Wall</div>
+                    <div class="legend-item"><div class="legend-box visited-node"></div>Visited</div>
+                    <div class="legend-item"><div class="legend-box path-node"></div>Path</div>
+                </div>
+
+                <div class="stats-panel" id="stats-panel">
+                    <div class="stat-card">
+                        <span class="stat-value" id="stat-visited">—</span>
+                        <span class="stat-label">Nodes Visited</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="stat-path">—</span>
+                        <span class="stat-label">Path Length</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="stat-time">—</span>
+                        <span class="stat-label">Time (ms)</span>
+                    </div>
+                    <div class="stat-card wide">
+                        <span class="stat-value" id="stat-algo">—</span>
+                        <span class="stat-label">Algorithm</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid + Info Sidebar -->
+            <div class="grid-area">
+                <div class="grid-container" id="grid"></div>
+
+                <!-- Algorithm Info Sidebar -->
+                <aside class="algo-info-panel" id="algo-info">
+                    <div class="algo-info-header">
+                        <span class="algo-info-icon" id="algo-icon">📐</span>
+                        <h3 id="algo-title">Select an Algorithm</h3>
+                    </div>
+                    <p class="algo-description" id="algo-description">Choose a maze generation or solving algorithm to see its description and complexity here.</p>
+                    <div class="complexity-grid" id="complexity-grid">
+                        <div class="complexity-item">
+                            <span class="complexity-label">Time</span>
+                            <span class="complexity-value" id="algo-time-complexity">—</span>
+                        </div>
+                        <div class="complexity-item">
+                            <span class="complexity-label">Space</span>
+                            <span class="complexity-value" id="algo-space-complexity">—</span>
+                        </div>
+                        <div class="complexity-item">
+                            <span class="complexity-label">Optimal</span>
+                            <span class="complexity-value" id="algo-optimal">—</span>
+                        </div>
+                        <div class="complexity-item">
+                            <span class="complexity-label">Complete</span>
+                            <span class="complexity-value" id="algo-complete">—</span>
+                        </div>
+                    </div>
+                    <div class="algo-tip" id="algo-tip"></div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <script src="grid.js"></script>
+    <script src="maze-generators.js"></script>
+    <script src="pathfinders.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
