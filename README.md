@@ -1,4 +1,5 @@
 # Amaze — Maze Generation & Solving Visualizer
+-------------------------------------------------------------------
 Live: https://nitinvedi.github.io/algo-visualizer/
 --------------------------------------------------------------------
 An interactive web-based visualizer for maze generation and pathfinding algorithms, built with vanilla HTML, CSS, and JavaScript.
